@@ -30,7 +30,7 @@ if(first()|dupefinished()){
     holoModel(2,"models/sprops/cylinders/size_1/cylinder_1_5x480.mdl")
     holoMaterial(2,"models/debug/debugwhite")
     holoDisableShading(2,1)
-    holoColor(2,vec(255,0,0))
+    holoColor(2,vec(0,255,255))
     holoAlpha(2,75)
     
     holoCreate(3)
@@ -40,7 +40,7 @@ if(first()|dupefinished()){
     holoModel(3,"models/hunter/misc/cone1x1.mdl")
     holoMaterial(3,"models/debug/debugwhite")
     holoDisableShading(3,1)
-    holoColor(3,vec(255,0,0))
+    holoColor(3,vec(0,255,255))
     holoAlpha(3,0)
     
     BallHolding=1
