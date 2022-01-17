@@ -1,0 +1,331 @@
+@name Blitz Ball (Who Touched It Last Edit)
+@persist Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop Text:string Indicator Timer DarkScreen Mass
+@trigger none
+runOnKeys(players(),1)
+runOnChat(1)
+interval(100)
+
+if(first()|dupefinished()){
+    
+    print("Blitz Ball E2! V1.0 made by Naki")
+    print("-------------------------------------------------")
+    print("Type .help to get started.")
+    print("If you have any questions feel free to msg me in Discord, Naki#0271")
+    
+    Time=1000*60*0
+    Tag=noentity()
+    holoCreate(1)
+    holoPos(1,Tag:shootPos())
+    holoScale(1,vec(-0.5))
+    holoModel(1,"models/sprops/geometry/sphere_120.mdl")
+    holoMaterial(1,"models/debug/debugwhite")
+    holoDisableShading(1,1)
+    holoColor(1,vec(0))
+    holoAlpha(1,75)
+    
+    holoCreate(2)
+    holoPos(2,entity():pos())
+    holoAng(2,ang(0,0,0))
+    holoScale(2,vec(15,15,100))
+    holoModel(2,"models/sprops/cylinders/size_1/cylinder_1_5x480.mdl")
+    holoMaterial(2,"models/debug/debugwhite")
+    holoDisableShading(2,1)
+    holoColor(2,vec(255,0,0))
+    holoAlpha(2,75)
+    
+    holoCreate(3)
+    holoPos(3,entity():pos())
+    holoAng(3,ang(0,0,180))
+    holoScale(3,vec(0.3))
+    holoModel(3,"models/hunter/misc/cone1x1.mdl")
+    holoMaterial(3,"models/debug/debugwhite")
+    holoDisableShading(3,1)
+    holoColor(3,vec(255,0,0))
+    holoAlpha(3,0)
+    
+    BallHolding=1
+    ThrowOk=0
+    Indicator=0
+    DarkScreen=0
+    Mass=100
+}
+
+if(chatClk(owner())){
+    if(owner():lastSaid():explode(" ")[1,string]==".it"){
+        hideChat(1)
+        if(owner():lastSaid():explode(" ")[2,string]){
+            Tag=findPlayerByName(owner():lastSaid():explode(" ")[2,string])
+        }else{
+            print("Usage: .it name")
+        }
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".start"){
+        hideChat(1)
+        BallHolding=1
+        ThrowOk=0
+        if(Tag==noentity()){
+            Tag=players()[randint(1,players():count()),entity]
+        }
+        if(Timer){
+            timer("timer",Time)
+            timer("halftime",Time/2)
+            timer("10seconds",Time-10000)
+            foreach(I,E:entity=players()){
+                #ifdef sendMessage(string)
+                    E:sendMessage("Game has started! Blitz Ball! Timer set to "+Time/1000+" Seconds!")
+                #else
+                    #ifdef entity:printPlayer(string)
+                        E:printPlayer("Game has started! Blitz Ball! Timer set to "+Time/1000+" Seconds!")
+                    #endif
+                #endif
+            }
+        }else{
+            foreach(I,E:entity=players()){
+                #ifdef sendMessage(string)
+                    E:sendMessage("Game has started! Blitz Ball! No Timer!")
+                #else
+                    #ifdef entity:printPlayer(string)
+                        E:printPlayer("Game has started! Blitz Ball! No Timer!")
+                    #endif
+                #endif
+            }
+        }
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".settime"){
+        hideChat(1)
+        if(owner():lastSaid():explode(" ")[2,string]){
+            Time=1000*60*owner():lastSaid():explode(" ")[2,string]:toNumber()
+            print("Time is now set to "+Time/1000+" seconds")
+        }else{
+            print("Usage: .settime number (minutes)")
+        }
+        if(Time==0){
+            Timer=0
+        }else{
+            Timer=1
+        }
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".time"){
+        hideChat(1)
+        print("Time is set to "+Time/1000+" seconds")
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".restart"){
+        hideChat(1)
+        reset()
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".indicator"){
+        hideChat(1)
+        Indicator=!Indicator
+        holoAlpha(3, 125*Indicator)
+        print("Indicator Toggled!")
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".help"){
+        hideChat(1)
+    print("IT controls:")
+    print("Mouse1 charge throw, let go to throw, power indicated by armor")
+    print("Mouse2 brings the ball to IT while darkening their screen")
+    print("Controls only work when holding \"none\" weapon out")
+    print("-------------------------------------------------")
+    print("Chat commands:")
+    print(".start - starts the game")
+    print(".settime number (minutes) - sets the length of the round in minutes, shows in seconds")
+    print(".it name - manually set who IT is")
+    print(".time show what round length has been set to")
+    print(".restart - restarts the e2")
+    print(".indicator - toggles indicator above IT")
+    print(".help - shows this information")
+    }
+}
+
+if(clk("halftime")){
+    foreach(I,E:entity=players()){
+        #ifdef sendMessage(string)
+            E:sendMessage(round((Time/2)/1000)+" Seconds Left!")
+        #else
+            #ifdef entity:printPlayer(string)
+                E:printPlayer(round((Time/2)/1000)+" Seconds Left!")
+            #endif
+        #endif
+    }
+}
+if(clk("10seconds")){
+    foreach(I,E:entity=players()){
+        #ifdef sendMessage(string)
+            E:sendMessage("10 Seconds Left!")
+        #else
+            #ifdef entity:printPlayer(string)
+                E:printPlayer("10 Seconds Left!")
+            #endif
+        #endif
+    }
+}
+if(clk("timer")){
+    findExcludePlayer(Tag)
+    findIncludeClass("player")
+    findInSphere(Ball:pos(),1500)
+    Array=findToArray()
+    Array:pushEntity(Tag)
+    foreach(I,E:entity=Array){
+        E:plySetHealth(0)
+        Prop=propSpawn("models/props_phx/cannonball_solid.mdl",ang(0,0,0),1)
+        Prop:setPos(E:pos())
+        Prop:setAlpha(0)
+        Prop:propNotSolid(1)
+        Prop:propBreak()
+        if(E==Tag){
+            #ifdef sendMessage(string)
+                E:sendMessage("You got "+(Array:count()-1)+" players!")
+            #else
+                #ifdef entity:printPlayer(string)
+                    E:printPlayer("You got "+(Array:count()-1)+" players!")
+                #endif
+            #endif
+        }else{
+            #ifdef sendMessage(string)
+                E:sendMessage(Tag:name()+" Got you!")
+            #else
+                #ifdef entity:printPlayer(string)
+                    E:printPlayer(Tag:name()+" Got you!")
+                #endif
+            #endif
+        }
+    }
+    foreach(I,E:entity=players()){
+        #ifdef sendMessage(string)
+            E:sendMessage("The game has ended!")
+        #else
+            #ifdef entity:printPlayer(string)
+                E:printPlayer("The game has ended!")
+            #endif
+        #endif
+    }
+    Ball:propBreak()
+    Stop=1
+}
+if(!Stop){
+foreach(I,E:entity=players()){
+    if(BallHolding==0){
+        if((E:pos()+vec(0,0,E:height()/2)):distance(Ball:pos())<45){
+            Tag=E
+        }
+    }
+    if(E==Tag){
+        holoVisible(1,E,1)
+    }else{
+        holoVisible(1,E,0)
+    }
+}
+holoPos(1,Tag:shootPos())
+holoPos(3,Tag:pos()+vec(0,0,(Tag:height()/2)+50))
+if(changed(Tag)&Tag){
+    if(Timer){
+    foreach(I,E:entity=players()){
+        #ifdef sendMessage(string)
+            E:sendMessage(Tag:name()+" Is now IT!")
+        #else
+            #ifdef entity:printPlayer(string)
+                E:printPlayer(Tag:name()+" Is now IT!")
+            #endif
+        #endif
+    }
+    }else{
+        foreach(I,E:entity=players()){
+        #ifdef sendMessage(string)
+            E:sendMessage(Tag:name()+" Now has the ball!")
+        #else
+            #ifdef entity:printPlayer(string)
+                E:printPlayer(Tag:name()+" Now has the ball!")
+            #endif
+        #endif
+        }
+    }
+}
+if(Tag:weapon():type()=="none"){
+    if(BallHolding){
+        if(Tag:keyAttack1()){
+            ThrowOk=1
+            if(Tag:armor()<100){
+                Tag:plySetArmor(Tag:armor()+2)
+            }
+            if(Tag:armor()>100){
+                Tag:plySetArmor(100)
+            }
+            Power=Tag:armor()
+        }
+        if(Tag:keyAttack1()==0){
+            if(ThrowOk){
+                ThrowOk=0
+                timer("throw",100)
+                Tag:plySetArmor(0)
+                if(Power>=90){
+                    Tag:soundPlay("powerthrow",3,"^weapons/underwater_explode4.wav")
+                    Rand=randint(0,3)
+                    if(Rand==1){
+                        Tag:soundPlay("takethis",4,"vo/npc/male01/incoming02.wav")
+                    }
+                    if(Rand==3){
+                        Tag:soundPlay("takethis2",4,"vo/npc/male01/evenodds.wav")
+                    }
+                }else{
+                    Tag:soundPlay("throw",2,"npc/vort/vort_foot3.wav")
+                }
+                soundPitch("throw",clamp(Power*1.5,75,150))
+            }
+        }
+    }
+    if((Tag:pos()+vec(0,0,Tag:height()/2)):distance(Ball:pos())<55){
+        if(Tag:keyUse()){
+            if(Tag:aimEntity()==Ball){
+                BallHolding=1
+                timer("removeball",100)
+            }
+        }
+    }
+}
+if(BallHolding==0){
+    Tag:plySetArmor(0)
+    if(Throw){
+        Ball:applyForce(Tag:eye()*Power*Ball:mass()*20+(8*Power>90))
+    }
+    if(Tag:weapon():type()=="none"){
+        if(Tag:keyAttack2()){
+            Ball:propSetVelocity(-(Ball:pos()-Tag:pos()):normalized()*7*clamp(Ball:pos():distance(Tag:pos()),2,500)*0.3)
+            if(Ball:pos():distance(Tag:pos())<60){
+                BallHolding=1
+                timer("removeball",100)
+            }
+        }
+    }
+}
+if(Ball){
+    holoPos(2,Ball:pos())
+    holoAlpha(2,75)
+}else{
+    holoAlpha(2,0)
+}
+holoAlpha(1,(253*(clamp(Ball:pos():distance(Tag:pos())*0.5,0,100)/100)*Tag:keyAttack2()*!BallHolding)*DarkScreen)
+if(clk("throw")){
+    BallHolding=0
+    Ball=propSpawn("models/props_phx/misc/soccerball.mdl",ang(0,0,0),0)
+    Ball:setPos(Tag:shootPos()+Tag:eye()*25)
+    Ball:propDrag(0)
+    Ball:propInertia(vec(0))
+    Ball:setMass(Mass)
+    Throw=1
+    timer("stopforce",100*(1+(5*(Power>90))))
+}
+if(clk("stopforce")){
+    Throw=0
+}
+if(Throw){
+if(Power>90){
+    Ball:propGravity(0)
+    Ball:applyTorque(vec(randint(-750,750)*100))
+}
+}else{
+    Ball:propGravity(600)
+}
+if(clk("removeball")){
+    Ball:propDelete()
+}
+}
