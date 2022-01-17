@@ -1,25 +1,17 @@
 @name Who Touched It Last Gamemode But E2!
 @persist Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop Text:string
-@outputs Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop Text:string
 runOnKeys(players(),1)
+runOnChat(1)
 interval(100)
 
-if(first()){
-    Time=1000*60*2
-    BallHolding=1
-    Tag=players()[randint(1,players():count()),entity]
-    #Tag=owner()
-    ThrowOk=0
-    timer("timer",Time)
-    timer("halftime",Time/2)
-    timer("10seconds",Time-10000)
-    foreach(I,E:entity=players()){
-        #ifdef sendmessage(string)
-            E:sendMessage("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
-        #else
-            E:printPlayer("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
-        #endif
-    }
+if(first()|dupefinished()){
+    
+    print("Who Touched It Last Gamemode But E2! V1.0 made by Naki")
+    print("-------------------------------------------------")
+    print("Type .help to get started.")
+    
+    Time=1000*60*1.5
+    Tag=noentity()
     holoCreate(1)
     holoPos(1,Tag:shootPos())
     holoScale(1,vec(-0.5))
@@ -48,29 +40,98 @@ if(first()){
     holoDisableShading(3,1)
     holoColor(3,vec(255,0,0))
     holoAlpha(3,125)
+    
+    BallHolding=1
+    ThrowOk=0
 }
+
+if(chatClk(owner())){
+    if(owner():lastSaid():explode(" ")[1,string]==".it"){
+        hideChat(1)
+        if(owner():lastSaid():explode(" ")[2,string]){
+            Tag=findPlayerByName(owner():lastSaid():explode(" ")[2,string])
+        }else{
+            print("Usage: .it name")
+        }
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".start"){
+        hideChat(1)
+        BallHolding=1
+        ThrowOk=0
+        Tag=players()[randint(1,players():count()),entity]
+        timer("timer",Time)
+        timer("halftime",Time/2)
+        timer("10seconds",Time-10000)
+        foreach(I,E:entity=players()){
+            #ifdef sendMessage(string)
+                E:sendMessage("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
+            #else
+                #ifdef printPlayer(string)
+                    E:printPlayer("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
+                #endif
+            #endif
+        }
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".settime"){
+        hideChat(1)
+        if(owner():lastSaid():explode(" ")[2,string]){
+            Time=1000*60*owner():lastSaid():explode(" ")[2,string]:toNumber()
+            print("Time is now set to "+Time/1000+" seconds")
+        }else{
+            print("Usage: .settime number (minutes)")
+        }
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".time"){
+        hideChat(1)
+        print("Time is set to "+Time/1000+" seconds")
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".restart"){
+        hideChat(1)
+        reset()
+    }
+    if(owner():lastSaid():explode(" ")[1,string]==".help"){
+        hideChat(1)
+    print("IT controls:")
+    print("Mouse1 charge throw, let go to throw, power indicated by armor")
+    print("Mouse2 brings the ball to IT while darkening their screen")
+    print("Controls only work when holding \"none\" weapon out")
+    print("-------------------------------------------------")
+    print("Chat commands:")
+    print(".start - starts the game")
+    print(".settime number (minutes) - sets the length of the round in minutes, shows in seconds")
+    print(".it name - manually set who IT is")
+    print(".time show what round length has been set to")
+    print(".restart - restarts the e2")
+    print(".help - shows this information")
+    }
+}
+
 if(clk("halftime")){
     foreach(I,E:entity=players()){
-        #ifdef sendmessage(string)
+        #ifdef sendMessage(string)
             E:sendMessage(round((Time/2)/1000)+" Seconds Left!")
         #else
-            E:printPlayer(round((Time/2)/1000)+" Seconds Left!")
+            #ifdef printPlayer(string)
+                E:printPlayer(round((Time/2)/1000)+" Seconds Left!")
+            #endif
         #endif
     }
 }
 if(clk("10seconds")){
     foreach(I,E:entity=players()){
-        #ifdef sendmessage(string)
+        #ifdef sendMessage(string)
             E:sendMessage("10 Seconds Left!")
         #else
-            E:printPlayer("10 Seconds Left!")
+            #ifdef printPlayer(string)
+                E:printPlayer("10 Seconds Left!")
+            #endif
         #endif
     }
 }
 if(clk("timer")){
     findExcludePlayer(Tag)
     findIncludeClass("player")
-    findInSphere(Ball:pos(),7500)
+    findInSphere(Ball:pos(),1500)
     Array=findToArray()
     Array:pushEntity(Tag)
     foreach(I,E:entity=Array){
@@ -81,18 +142,31 @@ if(clk("timer")){
         Prop:propNotSolid(1)
         Prop:propBreak()
         if(E==Tag){
-            #ifdef sendmessage(string)
-                E:sendMessage("Game Ended! You got "+(Array:count()-1)+" players!")
+            #ifdef sendMessage(string)
+                E:sendMessage("You got "+(Array:count()-1)+" players!")
             #else
-                E:printPlayer("Game Ended! You got "+(Array:count()-1)+" players!")
+                #ifdef printPlayer(string)
+                    E:printPlayer("You got "+(Array:count()-1)+" players!")
+                #endif
             #endif
         }else{
-            #ifdef sendmessage(string)
+            #ifdef sendMessage(string)
                 E:sendMessage(Tag:name()+" Got you!")
             #else
-                E:printPlayer(Tag:name()+" Got you!")
+                #ifdef printPlayer(string)
+                    E:printPlayer(Tag:name()+" Got you!")
+                #endif
             #endif
         }
+    }
+    foreach(I,E:entity=players()){
+        #ifdef sendMessage(string)
+            E:sendMessage("The game has ended!")
+        #else
+            #ifdef printPlayer(string)
+                E:printPlayer("The game has ended!")
+            #endif
+        #endif
     }
     Ball:propBreak()
     Stop=1
@@ -114,10 +188,12 @@ holoPos(1,Tag:shootPos())
 holoPos(3,Tag:pos()+vec(0,0,(Tag:height()/2)+50))
 if(changed(Tag)&Tag){
     foreach(I,E:entity=players()){
-        #ifdef sendmessage(string)
+        #ifdef sendMessage(string)
             E:sendMessage(Tag:name()+" Is now IT!")
         #else
-            E:printPlayer(Tag:name()+" Is now IT!")
+            #ifdef printPlayer(string)
+                E:printPlayer(Tag:name()+" Is now IT!")
+            #endif
         #endif
     }
 }
@@ -154,6 +230,8 @@ if(BallHolding==0){
     Tag:plySetArmor(0)
     if(Throw){
         Ball:applyForce(Tag:eye()*Power*Ball:mass()*15)
+    }else{
+        Ball:applyForce(Ball:vel()*0.9)
     }
     if(Tag:weapon():type()=="none"){
         if(Tag:keyAttack2()){
@@ -178,7 +256,7 @@ if(clk("throw")){
     Ball:setPos(Tag:shootPos()+Tag:eye()*25)
     Ball:propDrag(0)
     Ball:propInertia(vec(0))
-    Ball:setMass(1)
+    Ball:setMass(25)
     Throw=1
     timer("stopforce",100)
 }
