@@ -1,5 +1,6 @@
 @name Who Touched It Last Gamemode But E2!
 @persist Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop Text:string Indicator
+@trigger none
 runOnKeys(players(),1)
 runOnChat(1)
 interval(100)
@@ -15,7 +16,7 @@ if(first()|dupefinished()){
     Tag=noentity()
     holoCreate(1)
     holoPos(1,Tag:shootPos())
-    holoScale(1,vec(-0.5))
+    holoScale(1,vec(-1))
     holoModel(1,"models/sprops/geometry/sphere_120.mdl")
     holoMaterial(1,"models/debug/debugwhite")
     holoDisableShading(1,1)
@@ -253,7 +254,7 @@ if(Tag:weapon():type()=="none"){
 if(BallHolding==0){
     Tag:plySetArmor(0)
     if(Throw){
-        Ball:applyForce(Tag:eye()*Power*Ball:mass()*20+(8*Power>90))
+        Ball:applyForce(Tag:eye()*Power*Ball:mass()*20+(3*Power>90))
     }
     if(Tag:weapon():type()=="none"){
         if(Tag:keyAttack2()){
@@ -280,7 +281,7 @@ if(clk("throw")){
     Ball:propInertia(vec(0))
     Ball:setMass(5)
     Throw=1
-    timer("stopforce",100*(1+(5*(Power>90))))
+    timer("stopforce",100*(1+(3*(Power>90))))
 }
 if(clk("stopforce")){
     Throw=0
