@@ -225,6 +225,19 @@ if(Tag:weapon():type()=="none"){
                 ThrowOk=0
                 timer("throw",100)
                 Tag:plySetArmor(0)
+                if(Power>=90){
+                    Tag:soundPlay("powerthrow",3,"^weapons/underwater_explode4.wav")
+                    Rand=randint(0,3)
+                    if(Rand==1){
+                        Tag:soundPlay("takethis",4,"vo/npc/male01/incoming02.wav")
+                    }
+                    if(Rand==3){
+                        Tag:soundPlay("takethis2",4,"vo/npc/male01/evenodds.wav")
+                    }
+                }else{
+                    Tag:soundPlay("throw",2,"garrysmod/balloon_pop_cute.wav")
+                }
+                soundPitch("throw",clamp(Power*1.5,20,150))
             }
         }
     }
@@ -240,7 +253,7 @@ if(Tag:weapon():type()=="none"){
 if(BallHolding==0){
     Tag:plySetArmor(0)
     if(Throw){
-        Ball:applyForce(Tag:eye()*Power*Ball:mass()*20)
+        Ball:applyForce(Tag:eye()*Power*Ball:mass()*20+(8*Power>90))
     }
     if(Tag:weapon():type()=="none"){
         if(Tag:keyAttack2()){
@@ -267,10 +280,17 @@ if(clk("throw")){
     Ball:propInertia(vec(0))
     Ball:setMass(5)
     Throw=1
-    timer("stopforce",100)
+    timer("stopforce",100*(1+(5*(Power>90))))
 }
 if(clk("stopforce")){
     Throw=0
+}
+if(Throw){
+if(Power>90){
+    Ball:propGravity(0)
+}
+}else{
+    Ball:propGravity(600)
 }
 if(clk("removeball")){
     Ball:propDelete()
