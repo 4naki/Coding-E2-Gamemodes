@@ -31,7 +31,7 @@ if(first()|dupefinished()){
     holoMaterial(2,"models/debug/debugwhite")
     holoDisableShading(2,1)
     holoColor(2,vec(0,255,255))
-    holoAlpha(2,75)
+    holoAlpha(2,45)
     
     holoCreate(3)
     holoPos(3,entity():pos())
@@ -299,7 +299,7 @@ if(BallHolding==0){
 }
 if(Ball){
     holoPos(2,Ball:pos())
-    holoAlpha(2,75)
+    holoAlpha(2,45)
 }else{
     holoAlpha(2,0)
 }
