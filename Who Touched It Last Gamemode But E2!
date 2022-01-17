@@ -1,5 +1,5 @@
 @name Who Touched It Last Gamemode But E2!
-@persist Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop Text:string
+@persist Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop Text:string Indicator
 runOnKeys(players(),1)
 runOnChat(1)
 interval(100)
@@ -39,10 +39,11 @@ if(first()|dupefinished()){
     holoMaterial(3,"models/debug/debugwhite")
     holoDisableShading(3,1)
     holoColor(3,vec(255,0,0))
-    holoAlpha(3,125)
+    holoAlpha(3,0)
     
     BallHolding=1
     ThrowOk=0
+    Indicator=0
 }
 
 if(chatClk(owner())){
@@ -58,16 +59,18 @@ if(chatClk(owner())){
         hideChat(1)
         BallHolding=1
         ThrowOk=0
-        Tag=players()[randint(1,players():count()),entity]
+        if(Tag==noentity()){
+            Tag=players()[randint(1,players():count()),entity]
+        }
         timer("timer",Time)
         timer("halftime",Time/2)
         timer("10seconds",Time-10000)
         foreach(I,E:entity=players()){
             #ifdef sendMessage(string)
-                E:sendMessage("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
+                E:sendMessage("Game has started! Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
             #else
                 #ifdef printPlayer(string)
-                    E:printPlayer("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
+                    E:printPlayer("Game has started! Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
                 #endif
             #endif
         }
@@ -89,6 +92,12 @@ if(chatClk(owner())){
         hideChat(1)
         reset()
     }
+    if(owner():lastSaid():explode(" ")[1,string]==".indicator"){
+        hideChat(1)
+        Indicator=!Indicator
+        holoAlpha(3, 125*Indicator)
+        print("Indicator Toggled!")
+    }
     if(owner():lastSaid():explode(" ")[1,string]==".help"){
         hideChat(1)
     print("IT controls:")
@@ -102,6 +111,7 @@ if(chatClk(owner())){
     print(".it name - manually set who IT is")
     print(".time show what round length has been set to")
     print(".restart - restarts the e2")
+    print(".indicator - toggles indicator above IT")
     print(".help - shows this information")
     }
 }
