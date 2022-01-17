@@ -14,7 +14,9 @@ if(first()){
     timer("halftime",Time/2)
     timer("10seconds",Time-10000)
     foreach(I,E:entity=players()){
-        E:sendMessage("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
+        #ifdef sendmessage(string)
+            E:sendMessage("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
+        #endif
     }
     holoCreate(1)
     holoPos(1,Tag:shootPos())
@@ -47,12 +49,16 @@ if(first()){
 }
 if(clk("halftime")){
     foreach(I,E:entity=players()){
-        E:sendMessage(round((Time/2)/1000)+" Seconds Left!")
+        #ifdef sendmessage(string)
+            E:sendMessage(round((Time/2)/1000)+" Seconds Left!")
+        #endif
     }
 }
 if(clk("10seconds")){
     foreach(I,E:entity=players()){
-        E:sendMessage("10 Seconds Left!")
+        #ifdef sendmessage(string)
+            E:sendMessage("10 Seconds Left!")
+        #endif
     }
 }
 if(clk("timer")){
@@ -69,9 +75,13 @@ if(clk("timer")){
         Prop:propNotSolid(1)
         Prop:propBreak()
         if(E==Tag){
-            E:sendMessage("Game Ended! You got "+(Array:count()-1)+" players!")
+            #ifdef sendmessage(string)
+                E:sendMessage("Game Ended! You got "+(Array:count()-1)+" players!")
+            #endif
         }else{
-            E:sendMessage(Tag:name()+" Got you!")
+            #ifdef sendmessage(string)
+                E:sendMessage(Tag:name()+" Got you!")
+            #endif
         }
     }
     Ball:propBreak()
@@ -94,7 +104,9 @@ holoPos(1,Tag:shootPos())
 holoPos(3,Tag:pos()+vec(0,0,(Tag:height()/2)+50))
 if(changed(Tag)&Tag){
     foreach(I,E:entity=players()){
-        E:sendMessage(Tag:name()+" Is now IT!")
+        #ifdef sendmessage(string)
+            E:sendMessage(Tag:name()+" Is now IT!")
+        #endif
     }
 }
 if(Tag:weapon():type()=="none"){
