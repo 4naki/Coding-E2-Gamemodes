@@ -1,0 +1,169 @@
+@name Who Touched It Last Gamemode But E2!
+@persist Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop
+@outputs Time Ball:entity BallHolding Tag:entity ThrowOk Throw Power Array:array Stop
+runOnKeys(players(),1)
+interval(100)
+
+if(first()){
+    Time=1000*60*1
+    BallHolding=1
+    Tag=players()[randint(1,players():count()),entity]
+    #Tag=owner()
+    ThrowOk=0
+    timer("timer",Time)
+    timer("halftime",Time/2)
+    timer("10seconds",Time-10000)
+    foreach(I,E:entity=players()){
+        E:sendMessage("Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
+    }
+    holoCreate(1)
+    holoPos(1,Tag:shootPos())
+    holoScale(1,vec(-0.5))
+    holoModel(1,"models/sprops/geometry/sphere_120.mdl")
+    holoMaterial(1,"models/debug/debugwhite")
+    holoDisableShading(1,1)
+    holoColor(1,vec(0))
+    holoAlpha(1,75)
+    
+    holoCreate(2)
+    holoPos(2,entity():pos())
+    holoAng(2,ang(0,0,0))
+    holoScale(2,vec(15,15,100))
+    holoModel(2,"models/sprops/cylinders/size_1/cylinder_1_5x480.mdl")
+    holoMaterial(2,"models/debug/debugwhite")
+    holoDisableShading(2,1)
+    holoColor(2,vec(255,0,0))
+    holoAlpha(2,75)
+    
+    holoCreate(3)
+    holoPos(3,entity():pos())
+    holoAng(3,ang(0,0,180))
+    holoScale(3,vec(0.3))
+    holoModel(3,"models/hunter/misc/cone1x1.mdl")
+    holoMaterial(3,"models/debug/debugwhite")
+    holoDisableShading(3,1)
+    holoColor(3,vec(255,0,0))
+    holoAlpha(3,125)
+}
+if(clk("halftime")){
+    foreach(I,E:entity=players()){
+        E:sendMessage(round((Time/2)/1000)+" Seconds Left!")
+    }
+}
+if(clk("10seconds")){
+    foreach(I,E:entity=players()){
+        E:sendMessage("10 Seconds Left!")
+    }
+}
+if(clk("timer")){
+    findExcludePlayer(Tag)
+    findIncludeClass("player")
+    findInSphere(Ball:pos(),7500)
+    Array=findToArray()
+    Array:pushEntity(Tag)
+    foreach(I,E:entity=Array){
+        E:plySetHealth(0)
+        Prop=propSpawn("models/props_phx/cannonball_solid.mdl",ang(0,0,0),1)
+        Prop:setPos(E:pos())
+        Prop:setAlpha(0)
+        Prop:propNotSolid(1)
+        Prop:propBreak()
+        if(E==Tag){
+            E:sendMessage("Game Ended! You got "+(Array:count()-1)+" players!")
+        }else{
+            E:sendMessage(Tag:name()+" Got you!")
+        }
+    }
+    Ball:propBreak()
+    Stop=1
+}
+if(!Stop){
+foreach(I,E:entity=players()){
+    if(BallHolding==0){
+        if((E:pos()+vec(0,0,E:height()/2)):distance(Ball:pos())<45){
+            Tag=E
+        }
+    }
+    if(E==Tag){
+        holoVisible(1,E,1)
+    }else{
+        holoVisible(1,E,0)
+    }
+}
+holoPos(1,Tag:shootPos())
+holoPos(3,Tag:pos()+vec(0,0,(Tag:height()/2)+50))
+if(changed(Tag)&Tag){
+    foreach(I,E:entity=players()){
+        E:sendMessage(Tag:name()+" Is now IT!")
+    }
+}
+if(Tag:weapon():type()=="none"){
+    if(BallHolding){
+        if(Tag:keyAttack1()){
+            ThrowOk=1
+            if(Tag:armor()<100){
+                Tag:plySetArmor(Tag:armor()+2)
+            }
+            if(Tag:armor()>100){
+                Tag:plySetArmor(100)
+            }
+            Power=Tag:armor()
+        }
+        if(Tag:keyAttack1()==0){
+            if(ThrowOk){
+                ThrowOk=0
+                timer("throw",100)
+                Tag:plySetArmor(0)
+            }
+        }
+    }
+    if((Tag:pos()+vec(0,0,Tag:height()/2)):distance(Ball:pos())<55){
+        if(Tag:keyUse()){
+            if(Tag:aimEntity()==Ball){
+                BallHolding=1
+                timer("removeball",100)
+            }
+        }
+    }
+}
+if(BallHolding==0){
+    Tag:plySetArmor(0)
+    if(Throw){
+        Ball:applyForce(Tag:eye()*Power*Ball:mass()*15)
+    }else{
+        Ball:applyForce(Ball:vel()*0.9)
+    }
+    if(Tag:weapon():type()=="none"){
+        if(Tag:keyAttack2()){
+            Ball:propSetVelocity(-(Ball:pos()-Tag:pos()):normalized()*Ball:mass()*clamp(Ball:pos():distance(Tag:pos()),0,500)*0.1)
+            if(Ball:pos():distance(Tag:pos())<60){
+                BallHolding=1
+                timer("removeball",100)
+            }
+        }
+    }
+}
+if(Ball){
+    holoPos(2,Ball:pos())
+    holoAlpha(2,75)
+}else{
+    holoAlpha(2,0)
+}
+holoAlpha(1,(253*clamp(Ball:pos():distance(Tag:pos())*0.5,0,100)/100)*Tag:keyAttack2()*!BallHolding)
+if(clk("throw")){
+    BallHolding=0
+    Ball=propSpawn("models/props_phx/misc/soccerball.mdl",ang(0,0,0),0)
+    Ball:setPos(Tag:shootPos()+Tag:eye()*25)
+    Ball:propDrag(0)
+    Ball:propInertia(vec(0))
+    Ball:setMass(25)
+    Throw=1
+    timer("stopforce",100)
+}
+if(clk("stopforce")){
+    Throw=0
+}
+if(clk("removeball")){
+    Ball:propDelete()
+}
+}
