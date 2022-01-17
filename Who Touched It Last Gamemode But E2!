@@ -70,7 +70,7 @@ if(chatClk(owner())){
             #ifdef sendMessage(string)
                 E:sendMessage("Game has started! Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
             #else
-                #ifdef printPlayer(string)
+                #ifdef entity:printPlayer(string)
                     E:printPlayer("Game has started! Who touched it last but it's E2! Timer set to "+Time/1000+" Seconds!")
                 #endif
             #endif
@@ -122,7 +122,7 @@ if(clk("halftime")){
         #ifdef sendMessage(string)
             E:sendMessage(round((Time/2)/1000)+" Seconds Left!")
         #else
-            #ifdef printPlayer(string)
+            #ifdef entity:printPlayer(string)
                 E:printPlayer(round((Time/2)/1000)+" Seconds Left!")
             #endif
         #endif
@@ -133,7 +133,7 @@ if(clk("10seconds")){
         #ifdef sendMessage(string)
             E:sendMessage("10 Seconds Left!")
         #else
-            #ifdef printPlayer(string)
+            #ifdef entity:printPlayer(string)
                 E:printPlayer("10 Seconds Left!")
             #endif
         #endif
@@ -156,7 +156,7 @@ if(clk("timer")){
             #ifdef sendMessage(string)
                 E:sendMessage("You got "+(Array:count()-1)+" players!")
             #else
-                #ifdef printPlayer(string)
+                #ifdef entity:printPlayer(string)
                     E:printPlayer("You got "+(Array:count()-1)+" players!")
                 #endif
             #endif
@@ -164,7 +164,7 @@ if(clk("timer")){
             #ifdef sendMessage(string)
                 E:sendMessage(Tag:name()+" Got you!")
             #else
-                #ifdef printPlayer(string)
+                #ifdef entity:printPlayer(string)
                     E:printPlayer(Tag:name()+" Got you!")
                 #endif
             #endif
@@ -174,7 +174,7 @@ if(clk("timer")){
         #ifdef sendMessage(string)
             E:sendMessage("The game has ended!")
         #else
-            #ifdef printPlayer(string)
+            #ifdef entity:printPlayer(string)
                 E:printPlayer("The game has ended!")
             #endif
         #endif
@@ -202,7 +202,7 @@ if(changed(Tag)&Tag){
         #ifdef sendMessage(string)
             E:sendMessage(Tag:name()+" Is now IT!")
         #else
-            #ifdef printPlayer(string)
+            #ifdef entity:printPlayer(string)
                 E:printPlayer(Tag:name()+" Is now IT!")
             #endif
         #endif
@@ -240,13 +240,11 @@ if(Tag:weapon():type()=="none"){
 if(BallHolding==0){
     Tag:plySetArmor(0)
     if(Throw){
-        Ball:applyForce(Tag:eye()*Power*Ball:mass()*15)
-    }else{
-        Ball:applyForce(Ball:vel()*0.9)
+        Ball:applyForce(Tag:eye()*Power*Ball:mass()*20)
     }
     if(Tag:weapon():type()=="none"){
         if(Tag:keyAttack2()){
-            Ball:propSetVelocity(-(Ball:pos()-Tag:pos()):normalized()*Ball:mass()*clamp(Ball:pos():distance(Tag:pos()),0,500)*0.1)
+            Ball:propSetVelocity(-(Ball:pos()-Tag:pos()):normalized()*Ball:mass()*clamp(Ball:pos():distance(Tag:pos()),2,500)*0.3)
             if(Ball:pos():distance(Tag:pos())<60){
                 BallHolding=1
                 timer("removeball",100)
@@ -267,7 +265,7 @@ if(clk("throw")){
     Ball:setPos(Tag:shootPos()+Tag:eye()*25)
     Ball:propDrag(0)
     Ball:propInertia(vec(0))
-    Ball:setMass(25)
+    Ball:setMass(5)
     Throw=1
     timer("stopforce",100)
 }
