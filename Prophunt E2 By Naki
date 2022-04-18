@@ -1,0 +1,48 @@
+@name Prophunt E2 By Naki
+@persist [Players Players2]:array
+@outputs [Players Players2]:array
+runOnChat(1)
+interval(100)
+if(first()|dupefinished()){
+    
+    Players=players()
+    
+}elseif(chatClk()){
+    foreach(I,E:entity=Players){
+        if(chatClk(E)){
+            if(E:lastSaid()==".prophunt"){
+                hideChat(1)
+                Players2:pushEntity(E)
+                Players:remove(I)
+            }
+        }
+    }
+    foreach(I,E:entity=Players2){
+        if(chatClk(E)){
+            if(E:lastSaid()==".leave"){
+                hideChat(1)
+                Players:pushEntity(E)
+                Players2:remove(I)
+                E:setMaterial("")
+            }
+        }
+    }
+}
+foreach(I,E:entity=Players2){
+    if(changed(E:keyAttack1())&E:keyAttack1()){
+        if(E:aimEntity():isFrozen()==0){
+            if(E:aimEntity():owner()==owner()){
+                holoCreate(I)
+                holoModel(I,owner():aimEntity():model())
+                E:setMaterial("Models/effects/vol_light001")
+            }
+        }
+    }
+    if(E:keyPressed("c")){
+        holoAng(I,ang(0,E:angles():yaw(),0))
+    }
+    holoPos(I,E:pos()+vec(0,0,0))
+}
+for(I=Players2:count()+1,Players2:count()+10){
+    holoDelete(I)
+}
